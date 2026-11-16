@@ -20,13 +20,13 @@ def calculate_spool_weights(entered_weight_g: object) -> SpoolWeights:
 
     if entered_weight_g < MINIMUM_FULL_SPOOL_WEIGHT_G:
         total_weight_g = MINIMUM_FULL_SPOOL_WEIGHT_G
-        used_weight_g = entered_weight_g
+        remaining_weight_g = entered_weight_g
     else:
         total_weight_g = entered_weight_g
-        used_weight_g = 0
+        remaining_weight_g = entered_weight_g
 
     return SpoolWeights(
-        used_weight_g=used_weight_g,
+        used_weight_g=total_weight_g - remaining_weight_g,
         total_weight_g=total_weight_g,
-        remaining_weight_g=total_weight_g - used_weight_g,
+        remaining_weight_g=remaining_weight_g,
     )

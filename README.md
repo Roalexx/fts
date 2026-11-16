@@ -11,12 +11,13 @@ Adding a filament spool can involve manually entering details such as SKU, brand
 ## Features
 
 - Select a label photo from a file or take one with a camera.
+- Switch the web interface between Turkish and English; remember the selected language in the browser.
 - Extract OCR text locally with EasyOCR and use the Gemini API to turn it into structured fields.
 - Edit the recognized material, color, HEX color, brand, and SKU; preview, copy, or download the result as JSON.
 - Resolve `filament_id` from the material catalog instead of relying on the model to guess it.
 - Calculate used, total, and remaining spool weight:
-  - Values below 1000 g are treated as the amount used, with the total assumed to be 1000 g.
-  - Values of 1000 g or more are treated as the full spool weight, with 0 g used.
+  - Values below 1000 g are treated as the filament currently remaining; the total is assumed to be 1000 g and used weight is calculated as the difference.
+  - Values of 1000 g or more are treated as the full spool's net weight, with 0 g used.
 - Optionally find or create a slicer profile in Bambu Cloud and add a spool to Filament Management.
 - Run an HTTPS server for local-network access and mobile camera use.
 
@@ -137,12 +138,13 @@ Filament makarası eklerken SKU, marka, malzeme ve renk gibi bilgileri elle girm
 ## Özellikler
 
 - Etiket fotoğrafını dosyadan seçme veya kamera ile çekme.
+- Arayüz dilini Türkçe ve İngilizce arasında değiştirme; seçimi tarayıcıda hatırlama.
 - EasyOCR ile görüntüden yerel OCR metni çıkarma; metni Gemini API ile yapılandırılmış alanlara dönüştürme.
 - Tanınan malzeme, renk, HEX renk, marka ve SKU bilgilerini düzenleyip JSON olarak önizleme, kopyalama veya indirme.
 - `filament_id` değerini malzeme kataloğundan belirleme; modelin bu ID'yi tahmin etmesine güvenmeme.
 - Makara ağırlığını kullanılan, toplam ve kalan ağırlık olarak hesaplama:
-  - Girilen değer 1000 g'dan azsa kullanılan miktar kabul edilir; toplam 1000 g varsayılır.
-  - Girilen değer 1000 g veya daha fazlaysa tam makara ağırlığı kabul edilir; kullanılan miktar 0 g olur.
+  - Girilen değer 1000 g'dan azsa elinizde kalan filament miktarı kabul edilir; toplam 1000 g varsayılır ve kullanılan miktar fark olarak hesaplanır.
+  - Girilen değer 1000 g veya daha fazlaysa tam makaranın net ağırlığı kabul edilir; kullanılan miktar 0 g olur.
 - İsteğe bağlı olarak Bambu Cloud'da slicer profilini bulma veya oluşturma ve Filament Yönetimi'ne makara ekleme.
 - Yerel ağdan erişim ve mobil kamera için HTTPS sunucusu.
 
