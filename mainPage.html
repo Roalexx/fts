@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f4f0">
+    <title>Filament etiketleyici</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Segoe UI", sans-serif;
+        color: #20231f;
+        background: #f5f4f0;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        --green: #245c47;
+        --green-dark: #184333;
+        --muted: #6b706b;
+        --line: #dedfd8;
+        --surface: #fff;
+        --danger: #a13630;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 32px 18px 56px;
+        background:
+          radial-gradient(ellipse at 10% 0%, #e8eee6 0, transparent 38%),
+          #f5f4f0;
+      }
+
+      button, input { font: inherit; }
+
+      .shell { width: min(100%, 900px); margin: 0 auto; }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 28px;
+      }
+
+      .logo {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 13px;
+        color: white;
+        background: var(--green);
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+
+      .brand-name { font-size: 15px; font-weight: 750; }
+      .brand-caption { margin-top: 2px; color: var(--muted); font-size: 12px; }
+
+      .panel {
+        padding: clamp(22px, 5vw, 42px);
+        border: 1px solid #e8e8e1;
+        border-radius: 24px;
+        background: var(--surface);
+        box-shadow: 0 20px 60px #253c2d0b;
+      }
+
+      .eyebrow {
+        margin: 0 0 9px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      h1 { margin: 0; font-size: clamp(26px, 5vw, 36px); letter-spacing: -.04em; }
+      .intro { max-width: 570px; margin: 10px 0 28px; color: var(--muted); line-height: 1.6; }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .field { display: grid; gap: 8px; }
+      .field label { font-size: 13px; font-weight: 700; }
+      .hint { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+      input[type="text"], input[type="number"] {
+        width: 100%;
+        min-height: 46px;
+        padding: 0 13px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        outline: none;
+        background: #fff;
+      }
+
+      input:focus { border-color: #638d78; box-shadow: 0 0 0 3px #245c4717; }
+
+      .upload-box {
+        display: grid;
+        min-height: 190px;
+        align-content: center;
+        justify-items: center;
+        padding: 22px;
+        border: 1.5px dashed #c9cec5;
+        border-radius: 16px;
+        background: #fafbf8;
+        text-align: center;
+      }
+
+      .upload-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        margin-bottom: 12px;
+        place-items: center;
+        border-radius: 14px;
+        background: #e8efe9;
+        color: var(--green);
+        font-size: 21px;
+      }
+
+      .upload-title { font-size: 14px; font-weight: 750; }
+      .upload-subtitle { margin: 5px 0 14px; color: var(--muted); font-size: 12px; }
+      .button-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
+
+      button {
+        min-height: 43px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 750;
+        transition: background .15s, transform .15s, border-color .15s;
+      }
+
+      button:hover:not(:disabled) { transform: translateY(-1px); }
+      button:disabled { cursor: not-allowed; opacity: .48; }
+      .primary { color: white; background: var(--green); }
+      .primary:hover:not(:disabled) { background: var(--green-dark); }
+      .secondary { border-color: var(--line); background: white; color: #343a35; }
+      .quiet { background: transparent; color: var(--muted); }
+
+      .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+      .full { grid-column: 1 / -1; }
+
+      .preview-wrap { width: min(100%, 470px); margin-top: 18px; }
+      .preview-image {
+        display: block;
+        width: 100%;
+        max-height: 330px;
+        object-fit: contain;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: #f6f6f3;
+      }
+      .filename { overflow-wrap: anywhere; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+      .camera-panel {
+        width: min(100%, 470px);
+        margin-top: 18px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #f6f6f3;
+      }
+      .camera-video { display: block; width: 100%; max-height: 360px; border-radius: 9px; background: #1c211d; }
+      .camera-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+
+      .status { min-height: 20px; margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+      .status.error { color: var(--danger); }
+      .status.success { color: var(--green); }
+
+      .edit-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px; margin-top: 24px; }
+      .edit-image { width: 100%; max-height: 460px; object-fit: contain; border-radius: 14px; background: #f6f6f3; }
+      .edit-form { display: grid; align-content: start; gap: 15px; }
+      .hex-row { display: grid; grid-template-columns: 1fr 54px; gap: 9px; }
+      input[type="color"] { width: 54px; height: 46px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: white; }
+      .json-output { margin-top: 22px; }
+      .json-output pre {
+        overflow: auto;
+        max-height: 310px;
+        padding: 16px;
+        border: 1px solid #29342d;
+        border-radius: 13px;
+        color: #e9f1e9;
+        background: #202a23;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      [hidden] { display: none !important; }
+
+      @media (max-width: 650px) {
+        body { padding: 20px 12px 36px; }
+        .form-grid, .edit-layout { grid-template-columns: 1fr; }
+        .edit-layout { gap: 20px; }
+        .actions { flex-direction: column-reverse; }
+        .actions button { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="logo" aria-hidden="true">F</div>
+        <div>
+          <div class="brand-name">Filament etiketleyici</div>
+          <div class="brand-caption">Fotoğraftan ürün bilgilerini çıkarın</div>
+        </div>
+      </header>
+
+      <section id="uploadStep" class="panel">
+        <p class="eyebrow">Yeni filament</p>
+        <h1>Etiketi tanıtalım</h1>
+        <p class="intro">Filament etiketinin fotoğrafını ekleyin ve net ağırlığını girin. Bilgileri çıkardıktan sonra düzenleyebilirsiniz.</p>
+
+        <div class="form-grid">
+          <div class="field full">
+            <label>Filament fotoğrafı</label>
+            <div class="upload-box">
+              <div class="upload-icon" aria-hidden="true">＋</div>
+              <div class="upload-title">Etiket fotoğrafını ekleyin</div>
+              <div class="upload-subtitle">Kamerayla çekin veya cihazınızdan bir görsel seçin · En fazla 12 MB</div>
+              <div class="button-row">
+                <button id="openCameraButton" class="secondary" type="button">Kamerayı aç</button>
+                <button id="chooseFileButton" class="secondary" type="button">Dosyadan seç</button>
+              </div>
+              <input id="imageInput" type="file" accept="image/*" hidden>
+              <div id="previewWrap" class="preview-wrap" hidden>
+                <img id="imagePreview" class="preview-image" alt="Seçilen filament etiketi">
+                <div id="fileName" class="filename"></div>
+              </div>
+              <div id="cameraPanel" class="camera-panel" hidden>
+                <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+                <div class="camera-actions">
+                  <button id="captureButton" class="primary" type="button">Fotoğrafı çek</button>
+                  <button id="closeCameraButton" class="quiet" type="button">Kamerayı kapat</button>
+                </div>
+              </div>
+              <p id="cameraHttpsHelp" class="hint" hidden>
+                Telefon tarayıcısında kamera için HTTPS gerekir. Önce
+                <a href="/root-ca.crt" download="filament-local-ca.crt">yerel sertifikayı indirin ve telefona kurun</a>,
+                ardından <a id="httpsAppLink" target="_blank" rel="noopener">HTTPS adresini açın</a>.
+              </p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="weightInput">Kullanılan miktar veya tam makara ağırlığı</label>
+            <input id="weightInput" type="number" min="1" step="1" inputmode="numeric" placeholder="Örn. 1000" required>
+            <span class="hint">1000 g altı değer kullanılan miktar sayılır ve toplam 1000 g kabul edilir. 1000 g ve üzeri değer tam makara ağırlığı sayılır.</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="analyzeButton" class="primary" type="button" disabled>Fotoğrafı analiz et</button>
+        </div>
+        <p id="uploadStatus" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="editStep" class="panel" hidden>
+        <p class="eyebrow">Kontrol ve düzenleme</p>
+        <h1>Ürün bilgilerini düzenleyin</h1>
+        <p class="intro">Otomatik tanınan değerleri kontrol edin. Düzenlemeleriniz JSON çıktısına yansıtılır.</p>
+
+        <div class="edit-layout">
+          <div>
+            <img id="editImage" class="edit-image" alt="Analiz edilen filament etiketi">
+            <div id="editFileName" class="filename"></div>
+          </div>
+
+          <form id="editForm" class="edit-form">
+            <div class="field">
+              <label for="materialInput">Material</label>
+              <input id="materialInput" name="material" type="text" required>
+            </div>
+            <div class="field">
+              <label for="filamentIdInput">Bambu filament_id</label>
+              <input id="filamentIdInput" name="filament_id" type="text" readonly>
+              <span class="hint">Malzeme türüne göre otomatik belirlenir.</span>
+            </div>
+            <div class="field">
+              <label for="colorInput">Color</label>
+              <input id="colorInput" name="color" type="text" required>
+            </div>
+            <div class="field">
+              <label for="hexColorInput">HEX renk kodu</label>
+              <div class="hex-row">
+                <input id="hexColorInput" name="hex_color" type="text" pattern="#[0-9A-Fa-f]{6}" title="#RRGGBB biçiminde olmalı" required>
+                <input id="colorPicker" type="color" aria-label="HEX rengini seç">
+              </div>
+            </div>
+            <div class="field">
+              <label for="skuInput">SKU</label>
+              <input id="skuInput" name="sku" type="text" placeholder="Yoksa boş bırakın">
+            </div>
+            <div class="field">
+              <label for="brandInput">Marka</label>
+              <input id="brandInput" name="brand" type="text" placeholder="Boş bırakılırsa Generic kullanılır">
+            </div>
+            <div class="field">
+              <label for="editWeightInput">Kullanılan miktar veya tam makara ağırlığı (gram)</label>
+              <input id="editWeightInput" name="weight_g" type="number" min="1" step="1" required>
+              <span class="hint">1000 g altı girilen miktar kullanılmış kabul edilir; toplam 1000 g, kalan 1000 g eksi girilen miktardır.</span>
+            </div>
+          </form>
+        </div>
+
+        <div class="actions">
+          <button id="backButton" class="secondary" type="button">Başa dön</button>
+          <button id="showJsonButton" class="secondary" type="button">JSON önizle</button>
+          <button id="downloadButton" class="secondary" type="button">JSON'u indir</button>
+          <button id="addToBambuButton" class="primary" type="button">Filament Yönetimi'ne ekle</button>
+        </div>
+        <div id="jsonOutput" class="json-output" hidden>
+          <div class="field">
+            <label for="jsonPreview">Düzenlenmiş JSON</label>
+            <pre id="jsonPreview"></pre>
+            <button id="copyButton" class="secondary" type="button">JSON'u kopyala</button>
+          </div>
+        </div>
+        <p id="editStatus" class="status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script>
+      const HTTPS_PORT = /*HTTPS_PORT*/ 8443;
+      const FILAMENT_ID_MAP = /*FILAMENT_ID_MAP*/ {};
+      const uploadStep = document.getElementById("uploadStep");
+      const editStep = document.getElementById("editStep");
+      const imageInput = document.getElementById("imageInput");
+      const weightInput = document.getElementById("weightInput");
+      const analyzeButton = document.getElementById("analyzeButton");
+      const uploadStatus = document.getElementById("uploadStatus");
+      const previewWrap = document.getElementById("previewWrap");
+      const imagePreview = document.getElementById("imagePreview");
+      const fileName = document.getElementById("fileName");
+      const cameraPanel = document.getElementById("cameraPanel");
+      const cameraVideo = document.getElementById("cameraVideo");
+      const cameraHttpsHelp = document.getElementById("cameraHttpsHelp");
+      const httpsAppLink = document.getElementById("httpsAppLink");
+      const hexColorInput = document.getElementById("hexColorInput");
+      const colorPicker = document.getElementById("colorPicker");
+      const editForm = document.getElementById("editForm");
+      const addToBambuButton = document.getElementById("addToBambuButton");
+      const materialInput = document.getElementById("materialInput");
+      const filamentIdInput = document.getElementById("filamentIdInput");
+
+      let selectedFile = null;
+      let previewUrl = null;
+      let cameraStream = null;
+      let spoolAdded = false;
+
+      function setStatus(element, message, kind = "") {
+        element.textContent = message;
+        element.className = `status ${kind}`.trim();
+      }
+
+      function getFilamentId(material) {
+        const normalizedMaterial = String(material || "").trim().toUpperCase();
+        return FILAMENT_ID_MAP[normalizedMaterial] || FILAMENT_ID_MAP.PLA || "";
+      }
+
+      function updateFilamentId() {
+        filamentIdInput.value = getFilamentId(materialInput.value);
+      }
+
+      function getSpoolWeights(enteredWeight) {
+        const totalWeight = enteredWeight < 1000 ? 1000 : enteredWeight;
+        const usedWeight = enteredWeight < 1000 ? enteredWeight : 0;
+        return {
+          used_weight_g: usedWeight,
+          total_weight_g: totalWeight,
+          remaining_weight_g: totalWeight - usedWeight,
+        };
+      }
+
+      if (location.protocol === "file:") {
+        setStatus(
+          uploadStatus,
+          "Bu HTML dosyasını doğrudan açmayın. app.py sunucusunu başlatıp terminalde gösterilen adresi kullanın.",
+          "error",
+        );
+      }
+
+      function updateAnalyzeButton() {
+        const weight = Number(weightInput.value);
+        analyzeButton.disabled = !selectedFile || !weightInput.value || !Number.isInteger(weight) || weight <= 0;
+      }
+
+      function setSelectedFile(file) {
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+          setStatus(uploadStatus, "Lütfen bir görsel dosyası seçin.", "error");
+          return;
+        }
+        if (file.size > 12 * 1024 * 1024) {
+          setStatus(uploadStatus, "Görsel 12 MB sınırını aşıyor.", "error");
+          return;
+        }
+
+        selectedFile = file;
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(file);
+        imagePreview.src = previewUrl;
+        fileName.textContent = file.name;
+        previewWrap.hidden = false;
+        setStatus(uploadStatus, "");
+        updateAnalyzeButton();
+      }
+
+      function stopCamera() {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach((track) => track.stop());
+          cameraStream = null;
+        }
+        cameraVideo.srcObject = null;
+        cameraPanel.hidden = true;
+      }
+
+      function toDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Görsel okunamadı."));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function readEditedLabel() {
+        const formData = new FormData(document.getElementById("editForm"));
+        const material = String(formData.get("material")).trim();
+        const filamentId = getFilamentId(material);
+        const weight = Number(formData.get("weight_g"));
+        filamentIdInput.value = filamentId;
+        return {
+          material,
+          filament_id: filamentId,
+          color: String(formData.get("color")).trim(),
+          hex_color: String(formData.get("hex_color")).trim(),
+          sku: String(formData.get("sku")).trim() || null,
+          brand: String(formData.get("brand")).trim() || "Generic",
+          weight_g: weight,
+          ...getSpoolWeights(weight),
+        };
+      }
+
+      function refreshJsonPreview() {
+        const form = document.getElementById("editForm");
+        if (!form.reportValidity()) return null;
+        const result = readEditedLabel();
+        document.getElementById("jsonPreview").textContent = JSON.stringify(result, null, 2);
+        document.getElementById("jsonOutput").hidden = false;
+        return result;
+      }
+
+      document.getElementById("chooseFileButton").addEventListener("click", () => imageInput.click());
+      imageInput.addEventListener("change", () => setSelectedFile(imageInput.files[0]));
+      weightInput.addEventListener("input", updateAnalyzeButton);
+      materialInput.addEventListener("input", updateFilamentId);
+
+      document.getElementById("openCameraButton").addEventListener("click", async () => {
+        if (!window.isSecureContext) {
+          const httpsUrl = new URL(location.href);
+          httpsUrl.protocol = "https:";
+          httpsUrl.port = String(HTTPS_PORT);
+          httpsUrl.pathname = "/";
+          httpsUrl.search = "";
+          httpsUrl.hash = "";
+          httpsAppLink.href = httpsUrl.toString();
+          cameraHttpsHelp.hidden = false;
+          setStatus(uploadStatus, "Telefon kamerası için HTTPS ve telefona kurulmuş yerel sertifika gerekiyor.", "error");
+          return;
+        }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setStatus(uploadStatus, "Tarayıcı kamera erişimini desteklemiyor; dosyadan görsel seçebilirsiniz.", "error");
+          return;
+        }
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          });
+          cameraVideo.srcObject = cameraStream;
+          cameraPanel.hidden = false;
+          setStatus(uploadStatus, "");
+        } catch (error) {
+          setStatus(uploadStatus, `Kamera açılamadı: ${error.message}`, "error");
+        }
+      });
+
+      document.getElementById("closeCameraButton").addEventListener("click", stopCamera);
+      document.getElementById("captureButton").addEventListener("click", () => {
+        if (!cameraVideo.videoWidth) {
+          setStatus(uploadStatus, "Kamera görüntüsü henüz hazır değil.", "error");
+          return;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = cameraVideo.videoWidth;
+        canvas.height = cameraVideo.videoHeight;
+        canvas.getContext("2d").drawImage(cameraVideo, 0, 0);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            setStatus(uploadStatus, "Fotoğraf oluşturulamadı; tekrar deneyin.", "error");
+            return;
+          }
+          stopCamera();
+          setSelectedFile(new File([blob], `filament-${Date.now()}.jpg`, { type: "image/jpeg" }));
+        }, "image/jpeg", 0.92);
+      });
+
+      analyzeButton.addEventListener("click", async () => {
+        if (!selectedFile || !weightInput.value) return;
+        if (location.protocol === "file:") {
+          setStatus(uploadStatus, "Önce app.py sunucusunu başlatın ve terminalde gösterilen adresi açın.", "error");
+          return;
+        }
+        analyzeButton.disabled = true;
+        setStatus(uploadStatus, "Görsel OCR ve etiket tanıma ile işleniyor. İlk çalıştırmada OCR modeli yüklenebilir…");
+        try {
+          const image = await toDataUrl(selectedFile);
+          const response = await fetch("/api/label", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image, weight_g: Number(weightInput.value) }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Etiketleme başarısız oldu.");
+
+          const label = data.label;
+          materialInput.value = label.material || "";
+          updateFilamentId();
+          document.getElementById("colorInput").value = label.color || "";
+          hexColorInput.value = label.hex_color || "#808080";
+          if (/^#[0-9a-fA-F]{6}$/.test(hexColorInput.value)) colorPicker.value = hexColorInput.value;
+          document.getElementById("skuInput").value = label.sku || "";
+          document.getElementById("brandInput").value = label.brand || "Generic";
+          document.getElementById("editWeightInput").value = label.weight_g || Number(weightInput.value);
+          document.getElementById("editImage").src = previewUrl;
+          document.getElementById("editFileName").textContent = selectedFile.name;
+          spoolAdded = false;
+          addToBambuButton.disabled = false;
+          addToBambuButton.textContent = "Filament Yönetimi'ne ekle";
+
+          uploadStep.hidden = true;
+          editStep.hidden = false;
+          document.getElementById("jsonOutput").hidden = true;
+          setStatus(document.getElementById("editStatus"), "Tanıma tamamlandı. Bilgileri düzenleyip JSON indirebilir veya Filament Yönetimi'ne ekleyebilirsiniz.", "success");
+        } catch (error) {
+          setStatus(uploadStatus, error.message, "error");
+        } finally {
+          updateAnalyzeButton();
+        }
+      });
+
+      hexColorInput.addEventListener("input", () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(hexColorInput.value)) colorPicker.value = hexColorInput.value;
+      });
+      colorPicker.addEventListener("input", () => { hexColorInput.value = colorPicker.value.toUpperCase(); });
+
+      document.getElementById("showJsonButton").addEventListener("click", () => {
+        if (refreshJsonPreview()) setStatus(document.getElementById("editStatus"), "JSON düzenlenmiş değerlerden oluşturuldu.", "success");
+      });
+      addToBambuButton.addEventListener("click", async () => {
+        const label = refreshJsonPreview();
+        if (!label || spoolAdded) return;
+
+        addToBambuButton.disabled = true;
+        setStatus(document.getElementById("editStatus"), "Bulut preset'i kontrol ediliyor, makara Filament Yönetimi'ne ekleniyor…");
+        try {
+          const response = await fetch("/api/add-to-filament-manager", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ label }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Filament Yönetimi'ne ekleme başarısız oldu.");
+
+          spoolAdded = true;
+          addToBambuButton.textContent = "Filament Yönetimi'ne eklendi";
+          setStatus(document.getElementById("editStatus"), "Makara Bambu Cloud Filament Yönetimi'ne eklendi.", "success");
+        } catch (error) {
+          addToBambuButton.disabled = false;
+          setStatus(document.getElementById("editStatus"), error.message, "error");
+        }
+      });
+      editForm.addEventListener("input", () => {
+        if (spoolAdded) {
+          spoolAdded = false;
+          addToBambuButton.disabled = false;
+          addToBambuButton.textContent = "Filament Yönetimi'ne ekle";
+        }
+      });
+      document.getElementById("copyButton").addEventListener("click", async () => {
+        const result = refreshJsonPreview();
+        if (!result) return;
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(result, null, 2));
+          setStatus(document.getElementById("editStatus"), "JSON panoya kopyalandı.", "success");
+        } catch (error) {
+          setStatus(document.getElementById("editStatus"), `Kopyalama başarısız: ${error.message}`, "error");
+        }
+      });
+      document.getElementById("downloadButton").addEventListener("click", () => {
+        const result = refreshJsonPreview();
+        if (!result) return;
+        const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "filament.json";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+      document.getElementById("backButton").addEventListener("click", () => {
+        editStep.hidden = true;
+        uploadStep.hidden = false;
+        setStatus(uploadStatus, "");
+      });
+    </script>
+  </body>
+</html>
