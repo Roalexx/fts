@@ -112,7 +112,7 @@
       .field label { font-size: 13px; font-weight: 700; }
       .hint { color: var(--muted); font-size: 12px; line-height: 1.45; }
 
-      input[type="text"], input[type="number"] {
+      input[type="text"], input[type="number"], select {
         width: 100%;
         min-height: 46px;
         padding: 0 13px;
@@ -306,7 +306,34 @@
           <form id="editForm" class="edit-form">
             <div class="field">
               <label for="materialInput" data-i18n="material">Malzeme</label>
-              <input id="materialInput" name="material" type="text" required>
+              <select id="materialInput" name="material" required>
+                <option value="PLA">PLA</option>
+                <option value="PLA Basic">PLA Basic</option>
+                <option value="PLA Dynamic">PLA Dynamic</option>
+                <option value="PLA Tough">PLA Tough</option>
+                <option value="PLA Tough+">PLA Tough+</option>
+                <option value="PLA Aero">PLA Aero</option>
+                <option value="PLA Galaxy">PLA Galaxy</option>
+                <option value="PLA Glow">PLA Glow</option>
+                <option value="PLA Lite">PLA Lite</option>
+                <option value="PLA Marble">PLA Marble</option>
+                <option value="PLA Metal">PLA Metal</option>
+                <option value="PLA Palette">PLA Palette</option>
+                <option value="PLA Pastel">PLA Pastel (Generic)</option>
+                <option value="PLA Pure">PLA Pure</option>
+                <option value="PLA Sparkle">PLA Sparkle</option>
+                <option value="PLA Translucent">PLA Translucent</option>
+                <option value="PLA Wood">PLA Wood</option>
+                <option value="PLA Silk">PLA Silk</option>
+                <option value="PLA Silk+">PLA Silk+</option>
+                <option value="PLA Matte">PLA Matte</option>
+                <option value="PLA-CF">PLA-CF</option>
+                <option value="PETG">PETG</option>
+                <option value="PETG-CF">PETG-CF</option>
+                <option value="ABS">ABS</option>
+                <option value="ASA">ASA</option>
+                <option value="TPU">TPU</option>
+              </select>
             </div>
             <div class="field">
               <label for="filamentIdInput" data-i18n="filamentId">Bambu filament_id</label>
@@ -666,7 +693,7 @@
       document.getElementById("chooseFileButton").addEventListener("click", () => imageInput.click());
       imageInput.addEventListener("change", () => setSelectedFile(imageInput.files[0]));
       weightInput.addEventListener("input", updateAnalyzeButton);
-      materialInput.addEventListener("input", updateFilamentId);
+      materialInput.addEventListener("change", updateFilamentId);
 
       document.getElementById("openCameraButton").addEventListener("click", async () => {
         if (!window.isSecureContext) {
@@ -788,6 +815,19 @@
           spoolAdded = true;
           addToBambuButton.textContent = t("spoolAdded");
           setLocalizedStatus(document.getElementById("editStatus"), "spoolAddedSuccess", "success");
+          if (data.catalog_existing) {
+            setStatus(
+              document.getElementById("editStatus"),
+              "Mevcut SKU bulundu; kayıt güncellendi ve Filament Yönetimi'ne eklendi.",
+              "success",
+            );
+          } else if (data.catalog_saved) {
+            setStatus(
+              document.getElementById("editStatus"),
+              "Yeni ürün kataloğa kaydedildi ve Filament Yönetimi'ne eklendi.",
+              "success",
+            );
+          }
         } catch (error) {
           addToBambuButton.disabled = false;
           setStatus(document.getElementById("editStatus"), error.message, "error");

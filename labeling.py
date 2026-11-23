@@ -2,13 +2,16 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Optional, Sequence, Union
+from typing import Literal, Optional, Sequence, Union
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel, Field
 
-from filament_profiles import get_filament_profile
+from filament_profiles import (
+    get_filament_profile,
+    resolve_filament_label_fields,
+)
 from ocr import OCRComponent, OCRResult
 
 load_dotenv()
@@ -18,8 +21,38 @@ _RETRYABLE_API_STATUS_CODES = [408, 429, 500, 502, 503, 504]
 
 
 class FilamentLabel(BaseModel):
-    material: str = Field(
-        description="Filament hammaddesi (ör: PLA, PLA+, PETG, ABS, TPU, ASA). Tespit edilemezse 'UNKNOWN'."
+    material: Literal[
+        "PLA",
+        "PLA Basic",
+        "PLA Dynamic",
+        "PLA Tough",
+        "PLA Tough+",
+        "PLA Aero",
+        "PLA Galaxy",
+        "PLA Glow",
+        "PLA Lite",
+        "PLA Marble",
+        "PLA Metal",
+        "PLA Palette",
+        "PLA Pastel",
+        "PLA Pure",
+        "PLA Sparkle",
+        "PLA Translucent",
+        "PLA Wood",
+        "PLA Silk",
+        "PLA Silk+",
+        "PLA Matte",
+        "PLA-CF",
+        "PETG",
+        "PETG-CF",
+        "ABS",
+        "ASA",
+        "TPU",
+    ] = Field(
+        description=(
+            "Filamentin resmi malzeme türü. SKU veya paket kodunu kullanma; "
+            "sadece PLA, PLA Silk, PLA Matte, PLA-CF, PETG, PETG-CF, ABS, ASA veya TPU."
+        )
     )
     color: str = Field(
         description="Etiketteki renk adı (ör: 'Kaan', 'Orange', 'Matte Black'). 'Color:' etiketi olmasa bile bağlamdan ve SKU ipuçlarından rengi tespit et."
@@ -59,6 +92,10 @@ class FilamentLabelParser:
         self.fallback_model_name = fallback_model_name
         self.system_instruction = (
             "Sen 3D yazıcı filament etiketlerini ayrıştıran bir uzmansın. "
+            "material alanına hiçbir SKU, paket kodu veya ürün kodu yazma. "
+            "SKU mutlaka sku alanına, malzeme türü yalnızca material alanına yazılır. "
+            "Örneğin 'PFEXPLA1SYH1751KG' bir SKU'dur; bunun içine PLA geçse bile material alanına SKU değerini yazma. "
+            "Etikette 'PLA' yazıyorsa ancak Pastel/Matte/Silk varyantı belirtilmiyorsa material='PLA' kullan. "
             "Sana verilen ham OCR metinlerinde yazım hataları veya düzensiz satır yapıları olabilir. "
             "Farklı markaların etiket formatlarını anlayarak hammaddeyi (PLA, PETG vb.) ve rengi doğru tespit et. "
             "Örneğin 'Color: Orange' yazıyorsa rengi 'Orange' olarak al; açıkça 'Color' yazmıyorsa "
@@ -122,6 +159,11 @@ class FilamentLabelParser:
             raise RuntimeError("Model, filament etiketi için yapılandırılmış çıktı üretmedi.")
         response.parsed.brand = response.parsed.brand.strip() or "Generic"
         label = response.parsed.model_dump()
+        raw_material = label["material"]
+        label["material"], label["sku"] = resolve_filament_label_fields(
+            raw_material,
+            label.get("sku"),
+        )
         label["filament_id"] = get_filament_profile(label["material"]).filament_id
         return json.dumps(label, indent=2, ensure_ascii=False)
 

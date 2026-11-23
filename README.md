@@ -113,7 +113,8 @@ The JSON is printed to the terminal. If no image path is provided, `ornek_belge.
 
 ## Technical notes
 
-- Material and `filament_id` mappings are in `filament_profiles.py`. Unknown materials currently fall back to the PLA profile.
+- Material and `filament_id` mappings are in `filament_profiles.py`. The UI uses Bambu-compatible canonical types (PLA, PLA Silk, PLA Matte, PLA-CF, PETG, PETG-CF, ABS, ASA, and TPU); SKU/package codes are not accepted as material types.
+- For Filament Manager spool requests, `filamentType` is the Bambu material category (for example, `PLA`), while Bambu Studio displays `filamentName` as “Material Type” (for example, `PLA Pastel`). Keep a SKU in the note, not `filamentName`.
 - When creating a Bambu Cloud slicer profile, the printer profile defaults to `@BBL A1`. The integration settings need to be adapted for other printers.
 - Do not assume Gemini interpreted the OCR text correctly; review the information in the editing screen before adding it to the cloud.
 
@@ -240,7 +241,8 @@ JSON terminale yazdırılır. Görsel yolu verilmezse `ornek_belge.jpg` kullanı
 
 ## Teknik notlar
 
-- Malzeme ve `filament_id` eşlemesi `filament_profiles.py` içindedir. Bilinmeyen malzemeler şu anda PLA profiline düşer.
+- Malzeme ve `filament_id` eşlemesi `filament_profiles.py` içindedir. Arayüz Bambu uyumlu resmi türleri kullanır (PLA, PLA Silk, PLA Matte, PLA-CF, PETG, PETG-CF, ABS, ASA ve TPU); SKU/paket kodları malzeme türü olarak kabul edilmez.
+- Filament Yönetimi makara isteğinde `filamentType` Bambu malzeme kategorisidir (ör. `PLA`); Bambu Studio `filamentName` alanını “Malzeme Türü” olarak gösterir (ör. `PLA Pastel`). SKU'yu `filamentName` yerine nota yazın.
 - Bambu Cloud slicer profili oluşturulurken yazıcı profili varsayılan olarak `@BBL A1` kullanır. Başka yazıcılar için entegrasyon ayarı uyarlanmalıdır.
 - OCR metninin Gemini tarafından doğru yorumlandığını varsaymayın; buluta eklemeden önce düzenleme ekranındaki bilgileri kontrol edin.
 

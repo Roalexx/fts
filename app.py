@@ -18,14 +18,24 @@ import cv2
 import numpy as np
 from google.genai import errors
 
-from filament_profiles import get_filament_id_map, get_filament_profile
+from filament_profiles import (
+    get_filament_id_map,
+    get_filament_profile,
+    resolve_filament_label_fields,
+)
 from filament_weights import calculate_spool_weights
+from filament_catalog import (
+    find_product_by_sku,
+    initialize_catalog,
+    upsert_product,
+)
 from https_certificates import discover_local_addresses, ensure_local_tls_certificates
 from labeling import FilamentLabelParser
 from ocr import OCRComponent
 
 
 LOGGER = logging.getLogger(__name__)
+initialize_catalog()
 MAX_IMAGE_BYTES = 12 * 1024 * 1024
 MAX_REQUEST_BYTES = 17 * 1024 * 1024
 PAGE_PATH = Path(__file__).with_name("mainPage.html")
@@ -158,6 +168,14 @@ def _add_to_filament_manager(payload: object) -> dict:
     if isinstance(sku, str):
         label["sku"] = sku.strip() or None
 
+    try:
+        label["material"], label["sku"] = resolve_filament_label_fields(
+            label["material"],
+            label.get("sku"),
+        )
+    except ValueError as exc:
+        raise RequestValidationError(str(exc)) from exc
+
     expected_filament_id = get_filament_profile(label["material"]).filament_id
     provided_filament_id = label.get("filament_id")
     if provided_filament_id is not None and provided_filament_id != expected_filament_id:
@@ -185,7 +203,33 @@ def _add_to_filament_manager(payload: object) -> dict:
     from entegration import BambuCloudFilamentClient
 
     client = BambuCloudFilamentClient()
-    return client.add_spool_to_filament_manager(label)
+    existing_product = find_product_by_sku(label.get("sku"))
+    if existing_product is not None:
+        matches = all(
+            existing_product.get(field) == label.get(field)
+            for field in ("brand", "material", "filament_id", "color", "hex_color")
+        )
+        if not matches:
+            raise RequestValidationError(
+                "Bu SKU katalogda farklı marka, malzeme veya renkle kayıtlı. "
+                "SKU’yu kontrol edip düzelterek tekrar deneyin."
+            )
+
+    result = client.add_spool_to_filament_manager(label)
+    profile = get_filament_profile(label["material"])
+    catalog_product = {
+        **label,
+        "parent_template": profile.parent_template,
+        "base_id": profile.base_id,
+        "filament_id": profile.filament_id,
+    }
+    saved_product = upsert_product(catalog_product)
+    return {
+        "result": result,
+        "catalog_saved": True,
+        "catalog_existing": existing_product is not None,
+        "catalog_product": saved_product,
+    }
 
 
 class LabelingRequestHandler(BaseHTTPRequestHandler):
@@ -274,7 +318,10 @@ class LabelingRequestHandler(BaseHTTPRequestHandler):
         if self._reject_untrusted_client():
             return
         path = urlsplit(self.path).path
-        if path not in ("/api/label", "/api/add-to-filament-manager"):
+        if path not in (
+            "/api/label",
+            "/api/add-to-filament-manager",
+        ):
             self._send_json(404, {"error": "API yolu bulunamadı."})
             return
 
@@ -336,6 +383,7 @@ class LabelingRequestHandler(BaseHTTPRequestHandler):
             return
 
         self._send_json(200, {"label": label})
+
 
     def log_message(self, format_string: str, *args: object) -> None:
         LOGGER.info("%s - %s", self.address_string(), format_string % args)

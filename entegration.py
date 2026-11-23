@@ -8,7 +8,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from urllib.parse import quote
 
-from filament_profiles import MATERIAL_PROFILE_MAP, get_filament_profile
+from filament_profiles import (
+    MATERIAL_PROFILE_MAP,
+    get_filament_profile,
+    get_cloud_filament_type,
+    resolve_filament_label_fields,
+)
 from filament_weights import calculate_spool_weights
 
 try:
@@ -98,9 +103,13 @@ class BambuCloudFilamentClient:
     def add_filament_to_cloud(self, label_data: Dict[str, Any]) -> Dict[str, Any]:
         """Uygulama JSON çıktısını Bambu Cloud hesabına özel filament olarak ekler."""
         brand = (label_data.get("brand") or "Custom").strip()
-        material = (label_data.get("material") or "PLA").strip().upper()
+        material, resolved_sku = resolve_filament_label_fields(
+            label_data.get("material"),
+            label_data.get("sku"),
+        )
+        sku = (resolved_sku or "").strip()
+        cloud_filament_type = get_cloud_filament_type(material)
         color = (label_data.get("color") or "Default").strip()
-        sku = (label_data.get("sku") or "").strip()
         weight_g = label_data.get("weight_g") or 1000
 
         hex_color = (label_data.get("hex_color") or "#FFFFFF").strip().upper()
@@ -118,7 +127,7 @@ class BambuCloudFilamentClient:
             "updated_time": str(int(time.time())),
             "filament_settings_id": json.dumps(display_name, ensure_ascii=False),
             "filament_vendor": json.dumps(brand, ensure_ascii=False),
-            "filament_type": json.dumps(material, ensure_ascii=False),
+            "filament_type": json.dumps(cloud_filament_type, ensure_ascii=False),
             "default_filament_colour": json.dumps(hex_color),
             "filament_extruder_variant": json.dumps("Direct Drive Standard"),
             "filament_notes": json.dumps(
@@ -169,8 +178,12 @@ class BambuCloudFilamentClient:
         self, label_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Var olan slicer presetine bağlı fiziksel makarayı bulut envanterine ekler."""
-        sku = (label_data.get("sku") or "").strip()
-        material = (label_data.get("material") or "PLA").strip().upper()
+        material, resolved_sku = resolve_filament_label_fields(
+            label_data.get("material"),
+            label_data.get("sku"),
+        )
+        sku = (resolved_sku or "").strip()
+        cloud_filament_type = get_cloud_filament_type(material)
         material_profile = get_filament_profile(material)
         requested_filament_id = label_data.get("filament_id")
         if (
@@ -251,8 +264,8 @@ class BambuCloudFilamentClient:
         spool_payload = {
             "createType": "manual",
             "filamentVendor": brand,
-            "filamentType": material,
-            "filamentName": sku or material,
+            "filamentType": cloud_filament_type,
+            "filamentName": material,
             "filamentId": cloud_filament_id,
             "isSupport": False,
             "color": hex_color,
